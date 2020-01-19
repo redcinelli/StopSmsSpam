@@ -1,0 +1,128 @@
+package com.example.stopsmsspam
+
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import com.example.stopsmsspam.Domain.Domain
+import com.example.stopsmsspam.ShortMessageService.Sms
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        createNotificationChannel()
+
+        setContentView(R.layout.activity_main)
+
+        val btn_click_me = findViewById(R.id.btnStart) as Button
+// set on-click listener
+        btn_click_me.setOnClickListener {
+            //Toast.makeText(this@MainActivity, "You clicked me.", Toast.LENGTH_SHORT).show()
+            //createNotif()
+            mainFunc()
+        }
+    }
+
+    fun mainFunc(){
+        val spams = Domain.findSpamSms(readSms())
+        val strat = Domain.findStrategyToReply(spams)
+        println(strat.count())
+        strat.forEach{
+            //println(it.first.name + " : " +it.second.address + " : " + it.second.body + " :: " + Domain.extractAddressToReply(it.second, it.first))
+            val number = Domain.extractAddressToReply(it.second, it.first)
+            if (!Domain.alreadyUnsuscribed(readSms(), it.second.Thread_id) && number != "")
+                Domain.Unsuscribe(number)
+                println("Unsuscribe from : "+ number + "::" + it.second.address)
+        }
+    }
+
+    fun createNotif(){
+        // Create an explicit intent for an Activity in your app
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+
+        var builder = NotificationCompat.Builder(this, 1.toString())
+            .setSmallIcon(R.drawable.ic_stat_name)
+            .setContentTitle("Some title")
+            .setContentText("Did it work ?")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(this)) {
+            // notificationId is a unique int for each notification that you must define
+            notify(1, builder.build())
+        }
+    }
+
+    fun checkPermission(permission: String, messageExplain: String){
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, arrayOf(permission),1)
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+        }
+
+    }
+
+
+    fun readSms() : List<Sms> {
+        checkPermission(Manifest.permission.READ_SMS, "")
+        this.contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null).use {
+            return com.example.stopsmsspam.ShortMessageService.SmsManager.parseToSms(it)
+        }
+    }
+
+    fun findStop(messges: List<Sms>): List<Sms> {
+        return messges.filter { it.body.contains("STOP") }
+    }
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.channel_name)
+            val descriptionText = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(1.toString(), name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+
+}
