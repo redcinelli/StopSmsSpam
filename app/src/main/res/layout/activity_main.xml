@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
+<!--Todo: Centered button, nicer. add metrics of past successful opt out ...-->
+<!--    Start should return on the text flagged as spam, and let the user choose to opt out ?-->
     <Button
         android:id="@+id/btnStart"
         android:layout_width="wrap_content"

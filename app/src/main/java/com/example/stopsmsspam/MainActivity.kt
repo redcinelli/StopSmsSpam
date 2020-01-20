@@ -19,15 +19,18 @@ import androidx.core.content.ContextCompat
 import com.example.stopsmsspam.Domain.Domain
 import com.example.stopsmsspam.ShortMessageService.Sms
 
+// Todo: Clean the whole class, copy pasta from stackoverflow everywhere
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Still needed ?
         createNotificationChannel()
 
         setContentView(R.layout.activity_main)
 
+        // Todo: I would most probably want a lister on the event of incoming Sms, not a bath function
         val btn_click_me = findViewById(R.id.btnStart) as Button
 // set on-click listener
         btn_click_me.setOnClickListener {
@@ -50,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Todo : delete it, I should first define a work flow for my app
     fun createNotif(){
         // Create an explicit intent for an Activity in your app
 
@@ -73,6 +77,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Todo : not fully implemented, where do I use it ?
+    //  - missing message to justify the need for those permission
+    //  - how do I cleverly implement it ? (before every interaction with the Sms ?)
     fun checkPermission(permission: String, messageExplain: String){
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
 
@@ -96,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
+    // Todo: this function should not be here, it allow access to the database, this is more model like.
     fun readSms() : List<Sms> {
         checkPermission(Manifest.permission.READ_SMS, "")
         this.contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null).use {
@@ -104,9 +111,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Todo : delete it
     fun findStop(messges: List<Sms>): List<Sms> {
         return messges.filter { it.body.contains("STOP") }
     }
+
+    // Todo : copy pasta not fully undertood, but needed to create
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library

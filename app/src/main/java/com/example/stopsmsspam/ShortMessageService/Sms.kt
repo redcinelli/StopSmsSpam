@@ -5,6 +5,7 @@ import android.net.Uri
 import android.telephony.SmsManager
 import android.widget.Toast
 
+//Todo : find & use the proper data struct provided by android
 data class Sms (
     val address: String,
     val body: String,
@@ -44,14 +45,6 @@ class SmsManager{
                 if (it?.moveToFirst() != null) {
                     do {
                         messages.add(createSms(it))
-
-//                        for (col in 0 until it.columnCount) {
-//                            println(
-//                                col.toString() + " : " + it.getColumnName(col) + ": " + it.getString(
-//                                    col
-//                                )
-//                            )
-//                        }
                     } while (it.moveToNext())
                 }
             }
