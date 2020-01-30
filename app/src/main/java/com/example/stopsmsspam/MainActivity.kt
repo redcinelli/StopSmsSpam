@@ -4,19 +4,25 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Telephony
 import android.widget.Button
+import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.stopsmsspam.Domain.Domain
+import com.example.stopsmsspam.ShortMessageService.MyBroadcastReceiver
 import com.example.stopsmsspam.ShortMessageService.Sms
 
 // Todo: Clean the whole class, copy pasta from stackoverflow everywhere
@@ -28,9 +34,34 @@ class MainActivity : AppCompatActivity() {
         // Still needed ?
         createNotificationChannel()
 
+        val br: BroadcastReceiver = MyBroadcastReceiver()
+
+
         setContentView(R.layout.activity_main)
 
         // Todo: I would most probably want a lister on the event of incoming Sms, not a bath function
+        val listner = findViewById(R.id.smsListner) as Switch
+
+        listner.setOnCheckedChangeListener { _, isChecked ->
+
+            if (isChecked) {
+                listner.text  = "Sms Listener: ON"
+//                val filter = IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
+//                filter.priority = 1000
+                val filter = IntentFilter()
+                filter.addAction("android.provider.Telephony.SMS_RECEIVED")
+                filter.priority = 2147483647
+                registerReceiver(br, filter)
+
+                println("registering complete")
+            } else {
+                listner.text  = "Sms Listener: OFF"
+                unregisterReceiver(br)
+                println("no registered anymore")
+            }
+
+        }
+
         val btn_click_me = findViewById(R.id.btnStart) as Button
 // set on-click listener
         btn_click_me.setOnClickListener {

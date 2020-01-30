@@ -1,9 +1,7 @@
 package com.example.stopsmsspam.ShortMessageService
 
 import android.database.Cursor
-import android.net.Uri
 import android.telephony.SmsManager
-import android.widget.Toast
 
 //Todo : find & use the proper data struct provided by android
 data class Sms (

@@ -5,22 +5,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-<!--Todo: Centered button, nicer. add metrics of past successful opt out ...-->
-<!--    Start should return on the text flagged as spam, and let the user choose to opt out ?-->
+    <!--Todo: Centered button, nicer. add metrics of past successful opt out ...-->
+    <!--    Start should return on the text flagged as spam, and let the user choose to opt out ?-->
+
     <Button
         android:id="@+id/btnStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="19dp"
-        android:layout_marginEnd="300dp"
-        android:layout_marginRight="300dp"
         android:layout_marginBottom="664dp"
         android:text="@string/start_detection"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.47000003" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/smsListner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="103dp"
+        android:text="Sms listener"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
