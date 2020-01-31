@@ -10,6 +10,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.telephony.SubscriptionManager
+import android.telephony.TelephonyManager
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -19,6 +21,19 @@ import androidx.core.content.ContextCompat
 import com.example.stopsmsspam.Domain.Domain
 import com.example.stopsmsspam.ShortMessageService.Sms
 
+
+class SimInfo(val id_: Int, val display_name: String, val icc_id: String, val slot: Int) {
+
+    override fun toString(): String {
+        return "SimInfo{" +
+                "id_=" + id_ +
+                ", display_name='" + display_name + '\'' +
+                ", icc_id='" + icc_id + '\'' +
+                ", slot=" + slot +
+                '}'
+    }
+
+}
 // Todo: Clean the whole class, copy pasta from stackoverflow everywhere
 class MainActivity : AppCompatActivity() {
 
@@ -30,12 +45,11 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+        isSimAvailable(this)
+
         // Todo: I would most probably want a lister on the event of incoming Sms, not a bath function
         val btn_click_me = findViewById(R.id.btnStart) as Button
-// set on-click listener
         btn_click_me.setOnClickListener {
-            //Toast.makeText(this@MainActivity, "You clicked me.", Toast.LENGTH_SHORT).show()
-            //createNotif()
             mainFunc()
         }
     }
@@ -103,8 +117,31 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun isSimAvailable(context: Context): Boolean {
+        checkPermission(Manifest.permission.READ_PHONE_STATE, "")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            val sManager =
+                context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
+            val infoSim1 = sManager.getActiveSubscriptionInfoForSimSlotIndex(0)
+            val infoSim2 = sManager.getActiveSubscriptionInfoForSimSlotIndex(1)
+
+            println(infoSim1.number)
+            println(infoSim2.toString())
+            if (infoSim1 != null || infoSim2 != null) {
+                return true
+            }
+        } else {
+            val telephonyManager =
+                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            if (telephonyManager.simSerialNumber != null) {
+                return true
+            }
+        }
+        return false
+    }
     // Todo: this function should not be here, it allow access to the database, this is more model like.
     fun readSms() : List<Sms> {
+
         checkPermission(Manifest.permission.READ_SMS, "")
         this.contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null).use {
             return com.example.stopsmsspam.ShortMessageService.SmsManager.parseToSms(it)

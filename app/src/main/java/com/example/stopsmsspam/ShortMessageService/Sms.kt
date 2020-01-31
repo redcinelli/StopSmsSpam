@@ -1,9 +1,8 @@
 package com.example.stopsmsspam.ShortMessageService
 
 import android.database.Cursor
-import android.net.Uri
 import android.telephony.SmsManager
-import android.widget.Toast
+import android.telephony.SmsMessage
 
 //Todo : find & use the proper data struct provided by android
 data class Sms (
@@ -40,6 +39,7 @@ data class Sms (
 class SmsManager{
     companion object {
         fun parseToSms(cursor: Cursor?): List<Sms> {
+
             val messages = arrayListOf<Sms>()
             cursor.use {
                 if (it?.moveToFirst() != null) {
@@ -51,6 +51,7 @@ class SmsManager{
 
             return messages
         }
+
 
         fun createSms(it: Cursor): Sms {
             return Sms(
