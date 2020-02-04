@@ -59,9 +59,9 @@ class Domain {
             return history.filter { it.Thread_id == threadId }.any { it.body.trim().toUpperCase() == "STOP"}
         }
 
-        fun Unsuscribe(number: String) {
+        fun Unsuscribe(from:android.telephony.SmsManager, to: String) {
             //Todo: perform checks on the number ?
-            SmsManager.sendStopSms(number)
+            SmsManager.sendStopSms(from, to)
         }
     }
 }

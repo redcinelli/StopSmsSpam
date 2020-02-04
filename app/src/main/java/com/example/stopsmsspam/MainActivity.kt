@@ -20,6 +20,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.stopsmsspam.Domain.Domain
 import com.example.stopsmsspam.ShortMessageService.Sms
+import com.example.stopsmsspam.ShortMessageService.SmsManager
+import com.example.stopsmsspam.Utils.Security.PermissionHelper
 
 
 class SimInfo(val id_: Int, val display_name: String, val icc_id: String, val slot: Int) {
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        isSimAvailable(this)
+        // checkPermission(Manifest.permission.READ_PHONE_STATE, "")
 
         // Todo: I would most probably want a lister on the event of incoming Sms, not a bath function
         val btn_click_me = findViewById(R.id.btnStart) as Button
@@ -62,7 +64,9 @@ class MainActivity : AppCompatActivity() {
             //println(it.first.name + " : " +it.second.address + " : " + it.second.body + " :: " + Domain.extractAddressToReply(it.second, it.first))
             val number = Domain.extractAddressToReply(it.second, it.first)
             if (!Domain.alreadyUnsuscribed(readSms(), it.second.Thread_id) && number != "")
-                Domain.Unsuscribe(number)
+                //Todo: do not send sms twice, find out how to get the information form the sms received !
+                Domain.Unsuscribe(SmsManager.GetSmsManagerByNumber(this, this, "+33620942284"), number)
+                Domain.Unsuscribe(SmsManager.GetSmsManagerByNumber(this, this, "+33769484978"), number)
                 println("Unsuscribe from : "+ number + "::" + it.second.address)
         }
     }
@@ -91,58 +95,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Todo : not fully implemented, where do I use it ?
-    //  - missing message to justify the need for those permission
-    //  - how do I cleverly implement it ? (before every interaction with the Sms ?)
-    fun checkPermission(permission: String, messageExplain: String){
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
 
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this, arrayOf(permission),1)
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-            // Permission has already been granted
-        }
-
-    }
-
-    fun isSimAvailable(context: Context): Boolean {
-        checkPermission(Manifest.permission.READ_PHONE_STATE, "")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            val sManager =
-                context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
-            val infoSim1 = sManager.getActiveSubscriptionInfoForSimSlotIndex(0)
-            val infoSim2 = sManager.getActiveSubscriptionInfoForSimSlotIndex(1)
-
-            println(infoSim1.number)
-            println(infoSim2.toString())
-            if (infoSim1 != null || infoSim2 != null) {
-                return true
-            }
-        } else {
-            val telephonyManager =
-                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            if (telephonyManager.simSerialNumber != null) {
-                return true
-            }
-        }
-        return false
-    }
     // Todo: this function should not be here, it allow access to the database, this is more model like.
     fun readSms() : List<Sms> {
 
-        checkPermission(Manifest.permission.READ_SMS, "")
+        PermissionHelper.checkPermission(this, Manifest.permission.READ_SMS, "")
         this.contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null).use {
             return com.example.stopsmsspam.ShortMessageService.SmsManager.parseToSms(it)
         }
